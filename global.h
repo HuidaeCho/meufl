@@ -39,8 +39,8 @@ double recode_degree(double, void *);
 /* flen.c */
 void flen(struct raster_map *, struct raster_map *, int, int);
 
-/* flen_upstream.c */
-void flen_upstream(struct raster_map *, struct raster_map *, int);
+/* flen_upstream_moremem.c */
+void flen_upstream_moremem(struct raster_map *, struct raster_map *, int);
 
 /* flen_upstream_lessmem.c */
 void flen_upstream_lessmem(struct raster_map *, struct raster_map *, int);

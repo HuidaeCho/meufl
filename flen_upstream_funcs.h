@@ -43,7 +43,7 @@
 #define FLEN_UPSTREAM flen_upstream_lessmem
 #define UP(row, col) FIND_UP(row, col)
 #else
-#define FLEN_UPSTREAM flen_upstream
+#define FLEN_UPSTREAM flen_upstream_moremem
 #define UP(row, col) up_cells[INDEX(row, col)]
 static unsigned char *up_cells;
 #endif

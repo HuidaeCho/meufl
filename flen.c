@@ -5,7 +5,7 @@ void flen(struct raster_map *dir_map, struct raster_map *flen_map,
 {
     switch (use_lessmem) {
     case 0:
-        flen_upstream(dir_map, flen_map, from_one);
+        flen_upstream_moremem(dir_map, flen_map, from_one);
         break;
     case 1:
         flen_upstream_lessmem(dir_map, flen_map, from_one);
