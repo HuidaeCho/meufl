@@ -23,12 +23,6 @@ int gettimeofday(struct timeval *, struct timezone *);
 #define SE 2
 #define E 1
 
-#ifdef USE_UINT32_COUNT
-#define COUNT_RASTER_TYPE RASTER_MAP_TYPE_UINT32
-#else
-#define COUNT_RASTER_TYPE RASTER_MAP_TYPE_INT32
-#endif
-
 #ifdef USE_FLOAT64_LENGTH
 #define LENGTH_RASTER_TYPE RASTER_MAP_TYPE_FLOAT64
 #else
