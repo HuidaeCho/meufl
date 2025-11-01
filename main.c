@@ -134,8 +134,8 @@ int main(int argc, char *argv[])
         if (print_usage == 2)
             printf("\n");
         printf("Usage: meufl OPTIONS dir uflen\n\n"
-               "  dir\tInput flow direction raster (e.g., gpkg:file.gpkg:layer)\n"
-               "  uflen\tOutput upstream flow length GeoTIFF\n"
+               "  dir\t\tInput flow direction raster (e.g., gpkg:file.gpkg:layer)\n"
+               "  uflen\t\tOutput upstream flow length GeoTIFF\n"
                "  -1\t\tCount from 1 (default: 0)\n"
                "  -l\t\tUse less memory\n"
                "  -L\t\tUse least memory\n"
