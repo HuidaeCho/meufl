@@ -18,11 +18,11 @@ meufl$(EXT): \
 	timeval_diff.o \
 	raster.o \
 	recode.o \
-	flen.o \
-	flen_upstream_moremem.o \
-	flen_upstream_lessmem.o \
-	flen_upstream_leastmem.o
+	uflen.o \
+	uflen_moremem.o \
+	uflen_lessmem.o \
+	uflen_leastmem.o
 	$(CC) $(LDFLAGS) -o $@ $^ $(GDAL_LIBS)
 
 *.o: global.h raster.h
-f*_upstream*.o: flen_upstream_funcs.h
+uflen_*.o: uflen_funcs.h

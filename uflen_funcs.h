@@ -16,7 +16,7 @@
 #define DIR_NULL (unsigned char)dir_map->null_value
 
 #ifdef USE_LEAST_MEMORY
-#define FLEN_UPSTREAM flen_upstream_leastmem
+#define UFLEN uflen_leastmem
 #define UP(row, col) (unsigned char)(((int)DIR(row, col) - DIR(row, col)) * 256)
 #define SET_UP(row, col) do { \
         DIR(row, col) = -DIR(row, col) - FIND_UP(row, col); } while(0)
@@ -40,10 +40,10 @@
 #define GET_FLEN(row, col) (IS_NOTDONE(row, col) ? 0 : FLEN(row, col))
 #else
 #ifdef USE_LESS_MEMORY
-#define FLEN_UPSTREAM flen_upstream_lessmem
+#define UFLEN uflen_lessmem
 #define UP(row, col) FIND_UP(row, col)
 #else
-#define FLEN_UPSTREAM flen_upstream_moremem
+#define UFLEN uflen_moremem
 #define UP(row, col) up_cells[INDEX(row, col)]
 static unsigned char *up_cells;
 #endif
@@ -86,11 +86,11 @@ static FLEN_TYPE max_up(
 #endif
                            int, int);
 
-void FLEN_UPSTREAM(struct raster_map *dir_map
+void UFLEN(struct raster_map *dir_map
 #ifndef USE_LEAST_MEMORY
-                   , struct raster_map *flen_map
+           , struct raster_map *flen_map
 #endif
-                   , int from_one)
+           , int from_one)
 {
     int row, col;
 

@@ -189,7 +189,7 @@ int main(int argc, char *argv[])
 
     printf("Calculating flow length...\n");
     gettimeofday(&start_time, NULL);
-    flen(dir_map, flen_map, use_lessmem, from_one);
+    uflen(dir_map, flen_map, use_lessmem, from_one);
     gettimeofday(&end_time, NULL);
     printf("Computation time for flow length: %lld microsec\n",
            timeval_diff(NULL, &end_time, &start_time));

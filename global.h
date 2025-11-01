@@ -36,16 +36,16 @@ long long timeval_diff(struct timeval *, struct timeval *, struct timeval *);
 double recode_encoding(double, void *);
 double recode_degree(double, void *);
 
-/* flen.c */
-void flen(struct raster_map *, struct raster_map *, int, int);
+/* uflen.c */
+void uflen(struct raster_map *, struct raster_map *, int, int);
 
-/* flen_upstream_moremem.c */
-void flen_upstream_moremem(struct raster_map *, struct raster_map *, int);
+/* uflen_moremem.c */
+void uflen_moremem(struct raster_map *, struct raster_map *, int);
 
-/* flen_upstream_lessmem.c */
-void flen_upstream_lessmem(struct raster_map *, struct raster_map *, int);
+/* uflen_lessmem.c */
+void uflen_lessmem(struct raster_map *, struct raster_map *, int);
 
-/* flen_upstream_leastmem.c */
-void flen_upstream_leastmem(struct raster_map *, int);
+/* uflen_leastmem.c */
+void uflen_leastmem(struct raster_map *, int);
 
 #endif
