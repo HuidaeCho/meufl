@@ -215,8 +215,7 @@ static void trace_down(struct raster_map *dir_map
     /* accumulate the current cell itself */
     FLEN(r, c) = flen;
 
-    /* if the downstream cell is null or any upstream cells of the downstream
-     * cell have never been visited, stop tracing down */
+    /* if the downstream cell is null, stop tracing down */
     if (row < 0 || row >= nrows || col < 0 || col >= ncols ||
         GET_DIR(row, col) == DIR_NULL) {
         if (from_one)
@@ -225,10 +224,13 @@ static void trace_down(struct raster_map *dir_map
     }
 
 #ifdef USE_LEAST_MEMORY
+    /* if the downstream cell is done, stop tracing down */
     if (IS_DONE(row, col))
         return;
 #endif
 
+    /* if any upstream cells of the downstream cell have never been visited,
+     * stop tracing down */
     if (!(flen_up = max_up(
 #if defined USE_LESS_MEMORY || defined USE_LEAST_MEMORY
                               dir_map,
