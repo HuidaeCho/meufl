@@ -166,6 +166,9 @@ static void trace_down(struct raster_map *dir_map
     unsigned char dir = GET_DIR(row, col);
     FLEN_TYPE flen_up;
 
+    /* assign the current cell's flen */
+    FLEN(r, c) = flen;
+
     /* find the downstream cell */
     switch (dir) {
     case NW:
@@ -197,9 +200,6 @@ static void trace_down(struct raster_map *dir_map
         col++;
         break;
     }
-
-    /* accumulate the current cell itself */
-    FLEN(r, c) = flen;
 
     /* if the downstream cell is null, stop tracing down */
     if (row < 0 || row >= nrows || col < 0 || col >= ncols ||
@@ -237,7 +237,7 @@ static void trace_down(struct raster_map *dir_map
 }
 
 /* if any upstream cells have never been visited, 0 is returned; otherwise, the
- * sum of upstream accumulation is returned */
+ * max of the upstream flen and the current flen is returned */
 static FLEN_TYPE max_up(
 #if defined USE_LESS_MEMORY || defined USE_LEAST_MEMORY
                            struct raster_map *dir_map,
