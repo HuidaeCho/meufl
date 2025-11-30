@@ -19,21 +19,9 @@
 #define UFLEN uflen_leastmem
 #define UP(row, col) (unsigned char)(((int)DIR(row, col) - DIR(row, col)) * 256)
 #define SET_UP(row, col) do { \
-        DIR(row, col) = -DIR(row, col) - FIND_UP(row, col); } while(0)
+        DIR(row, col) = -DIR(row, col) - FIND_UP(row, col) / 256.; } while(0)
 #define GET_DIR(row, col) (unsigned char)abs(DIR(row, col))
 #define IS_NOTDONE(row, col) (DIR(row, col) < 0)
-#define FIND_UP(row, col) ( \
-        (row > 0 ? \
-         (col > 0 && GET_DIR(row - 1, col - 1) == SE ? NW : 0) + \
-         (GET_DIR(row - 1, col) == S ? N : 0) + \
-         (col < ncols - 1 && GET_DIR(row - 1, col + 1) == SW ? NE : 0) : 0) + \
-        (col > 0 && GET_DIR(row, col - 1) == E ? W : 0) + \
-        (col < ncols - 1 && GET_DIR(row, col + 1) == W ? E : 0) + \
-        (row < nrows - 1 ? \
-         (col > 0 && GET_DIR(row + 1, col - 1) == NE ? SW : 0) + \
-         (GET_DIR(row + 1, col) == N ? S : 0) + \
-         (col < ncols - 1 && GET_DIR(row + 1, col + 1) == NW ? SE : 0) : 0)) \
-	 / 256.
 #define DIR(row, col) dir_map->cells.CELL_TYPE[INDEX(row, col)]
 #define IS_DONE(row, col) !IS_NOTDONE(row, col)
 #define FLEN(row, col) DIR(row, col)
@@ -53,7 +41,6 @@ static unsigned char *up_cells;
 #define GET_FLEN(row, col) FLEN(row, col)
 #endif
 
-#ifndef USE_LEAST_MEMORY
 #define FIND_UP(row, col) ( \
         (row > 0 ? \
          (col > 0 && GET_DIR(row - 1, col - 1) == SE ? NW : 0) | \
@@ -65,7 +52,6 @@ static unsigned char *up_cells;
          (col > 0 && GET_DIR(row + 1, col - 1) == NE ? SW : 0) | \
          (GET_DIR(row + 1, col) == N ? S : 0) | \
          (col < ncols - 1 && GET_DIR(row + 1, col + 1) == NW ? SE : 0) : 0))
-#endif
 
 static int nrows, ncols;
 
