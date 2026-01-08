@@ -1,0 +1,19 @@
+cff-version: 1.2.0
+title: "Memory-Efficient Upstream Flow Length (Flow in Float)"
+version: "0.1.0"
+authors:
+  - family-names: Cho
+    given-names: Huidae
+date-released: "2026-01-01"
+url: "https://github.com/HuidaeCho/flow-in-float"
+message: >
+  If you use this software or its algorithms, please cite the associated manuscript.
+preferred-citation:
+  type: manuscript
+  authors:
+    - family-names: Cho
+      given-names: Huidae
+  title: "Flow in Float: Memory-Efficient Upstream Flow Length Parallel Computation Using an IEEE-754-Based Union Encoding"
+  journal: "Environmental Modelling & Software"
+  year: 2026
+  status: "under review"
