@@ -21,11 +21,8 @@
 #define SET_UP(row, col) do { \
         DIR(row, col) = -DIR(row, col) - FIND_UP(row, col) / 256.; } while(0)
 #define GET_DIR(row, col) (unsigned char)abs(DIR(row, col))
-#define IS_NOTDONE(row, col) (DIR(row, col) < 0)
 #define DIR(row, col) dir_map->cells.CELL_TYPE[INDEX(row, col)]
-#define IS_DONE(row, col) !IS_NOTDONE(row, col)
 #define FLEN(row, col) DIR(row, col)
-#define GET_FLEN(row, col) (IS_NOTDONE(row, col) ? 0 : FLEN(row, col))
 #else
 #ifdef USE_LESS_MEMORY
 #define UFLEN uflen_lessmem
@@ -38,7 +35,6 @@ static unsigned char *up_cells;
 #define DIR(row, col) dir_map->cells.byte[INDEX(row, col)]
 #define GET_DIR(row, col) DIR(row, col)
 #define FLEN(row, col) flen_map->cells.CELL_TYPE[INDEX(row, col)]
-#define GET_FLEN(row, col) FLEN(row, col)
 #endif
 
 #define FIND_UP(row, col) ( \
@@ -62,7 +58,7 @@ static void trace_down(struct raster_map *
 #ifndef USE_LEAST_MEMORY
                        , struct raster_map *
 #endif
-                       , int, int, int, FLEN_TYPE);
+                       , int, int, int, unsigned char);
 static FLEN_TYPE max_up(
 #if defined USE_LESS_MEMORY || defined USE_LEAST_MEMORY
                            struct raster_map *,
@@ -70,7 +66,7 @@ static FLEN_TYPE max_up(
 #ifndef USE_LEAST_MEMORY
                            struct raster_map *,
 #endif
-                           int, int);
+                           int, int, int *);
 
 void UFLEN(struct raster_map *dir_map
 #ifndef USE_LEAST_MEMORY
@@ -111,24 +107,39 @@ void UFLEN(struct raster_map *dir_map
 #pragma omp parallel for schedule(dynamic) private(col)
     for (row = 0; row < nrows; row++) {
         for (col = 0; col < ncols; col++) {
-            unsigned char dir = GET_DIR(row, col);
+            unsigned char dir, up;
+
+#ifdef USE_LEAST_MEMORY
+            FLEN_TYPE flen_dir;
+
+#pragma omp atomic read seq_cst
+            flen_dir = DIR(row, col);
+            if (flen_dir >= 0)
+                continue;
+            dir = (unsigned char)abs(flen_dir);
+            up = (unsigned char)(((int)flen_dir - flen_dir) * 256);
+#else
+            if ((dir = GET_DIR(row, col)) == DIR_NULL)
+                continue;
+            up = UP(row, col);
+#endif
+            if (up)
+                continue;
 
             /* if the current cell is not null and has no upstream cells, start
              * tracing down */
-            if (
-#ifdef USE_LEAST_MEMORY
-                   IS_NOTDONE(row, col)
-#else
-                   dir != DIR_NULL
-#endif
-                   && !UP(row, col))
-                trace_down(dir_map
+
+            /* assign the current cell's flen */
+#pragma omp atomic write seq_cst
+            FLEN(row, col) =
+                from_one ? (dir & ortho_dirs ? half_ortho_flen :
+                            half_dia_flen) : 1;
+
+            trace_down(dir_map
 #ifndef USE_LEAST_MEMORY
-                           , flen_map
+                       , flen_map
 #endif
-                           , from_one, row, col,
-                           from_one ? (dir & ortho_dirs ? half_ortho_flen :
-                                       half_dia_flen) : 1);
+                       , from_one, row, col, dir);
         }
     }
 
@@ -160,60 +171,70 @@ static void trace_down(struct raster_map *dir_map
 #ifndef USE_LEAST_MEMORY
                        , struct raster_map *flen_map
 #endif
-                       , int from_one, int row, int col, FLEN_TYPE flen)
+                       , int from_one, int row, int col, unsigned char dir)
 {
-    int r = row, c = col;
-    unsigned char dir = GET_DIR(row, col);
+    int next_row = row, next_col = col;
+    unsigned char next_dir;
     FLEN_TYPE flen_up;
+    int nup;
 
-    /* assign the current cell's flen */
-    FLEN(r, c) = flen;
+#ifdef USE_LEAST_MEMORY
+    FLEN_TYPE flen_dir;
+#endif
 
     /* find the downstream cell */
     switch (dir) {
     case NW:
-        row--;
-        col--;
+        next_row--;
+        next_col--;
         break;
     case N:
-        row--;
+        next_row--;
         break;
     case NE:
-        row--;
-        col++;
+        next_row--;
+        next_col++;
         break;
     case W:
-        col--;
+        next_col--;
         break;
     case E:
-        col++;
+        next_col++;
         break;
     case SW:
-        row++;
-        col--;
+        next_row++;
+        next_col--;
         break;
     case S:
-        row++;
+        next_row++;
         break;
     case SE:
-        row++;
-        col++;
+        next_row++;
+        next_col++;
         break;
-    }
-
-    /* if the downstream cell is null, stop tracing down */
-    if (row < 0 || row >= nrows || col < 0 || col >= ncols ||
-        GET_DIR(row, col) == DIR_NULL) {
-        if (from_one)
-            FLEN(r, c) += dir & ortho_dirs ? half_ortho_flen : half_dia_flen;
-        return;
     }
 
 #ifdef USE_LEAST_MEMORY
+#pragma omp atomic read seq_cst
+    flen_dir = DIR(next_row, next_col);
     /* if the downstream cell is done, stop tracing down */
-    if (IS_DONE(row, col))
+    if (flen_dir > 0)
         return;
+    next_dir = (unsigned char)abs(flen_dir);
+#else
+    next_dir = GET_DIR(next_row, next_col);
 #endif
+
+    /* if the downstream cell is null, stop tracing down */
+    if (next_row < 0 || next_row >= nrows || next_col < 0 || next_col >= ncols
+        || next_dir == DIR_NULL) {
+        if (from_one)
+            /* updating a terminal cell does not require atomicity because no
+             * other threads will check its value */
+            FLEN(row, col) +=
+                dir & ortho_dirs ? half_ortho_flen : half_dia_flen;
+        return;
+    }
 
     /* if any upstream cells of the downstream cell have never been visited,
      * stop tracing down */
@@ -224,8 +245,39 @@ static void trace_down(struct raster_map *dir_map
 #ifndef USE_LEAST_MEMORY
                               flen_map,
 #endif
-                              row, col)))
+                              next_row, next_col, &nup)))
         return;
+
+    /* only one thread should move to the next cell */
+    if (nup == 1) {
+#pragma omp atomic write seq_cst
+        FLEN(next_row, next_col) = flen_up;
+    }
+    else {
+        FLEN_TYPE expected = 0;
+
+        /* if the next cell is already owned by another thread, stop */
+#pragma omp atomic read seq_cst
+        expected = FLEN(next_row, next_col);
+        if (expected > 0)
+            return;
+
+        /* if the next cell is not owned yet by another thread, own it */
+#pragma omp atomic compare capture seq_cst
+        if (FLEN(next_row, next_col) == expected) {
+            FLEN(next_row, next_col) = flen_up;
+        }
+        else {
+            /* otherwise, we need to check this value again because FLEN(next_row, next_col)
+             * could change between atomic read and atomic compare capture */
+            expected = FLEN(next_row, next_col);
+        }
+
+        /* at this point, if the current thread owned the next cell, expected <= 0;
+         * otherwise, expected > 0 */
+        if (expected > 0)
+            return;
+    }
 
     /* use gcc -O2 or -O3 flags for tail-call optimization
      * (-foptimize-sibling-calls) */
@@ -233,7 +285,7 @@ static void trace_down(struct raster_map *dir_map
 #ifndef USE_LEAST_MEMORY
                , flen_map
 #endif
-               , from_one, row, col, flen_up);
+               , from_one, next_row, next_col, next_dir);
 }
 
 /* if any upstream cells have never been visited, 0 is returned; otherwise, the
@@ -245,63 +297,143 @@ static FLEN_TYPE max_up(
 #ifndef USE_LEAST_MEMORY
                            struct raster_map *flen_map,
 #endif
-                           int row, int col)
+                           int row, int col, int *nup)
 {
-    unsigned char up = UP(row, col);
+    unsigned char up;
     FLEN_TYPE max = 0, flen;
 
 #ifdef USE_LEAST_MEMORY
-#pragma omp flush(dir_map)
+    FLEN_TYPE flen_dir;
+
+#pragma omp atomic read seq_cst
+    flen_dir = DIR(row, col);
+    if (flen_dir > 0)
+        return 0;
+    up = (unsigned char)(((int)flen_dir - flen_dir) * 256);
 #else
-#pragma omp flush(flen_map)
+    up = UP(row, col);
 #endif
+
+    *nup = 0;
     if (up & NW) {
-        if (!(flen = GET_FLEN(row - 1, col - 1)))
+#ifdef USE_LEAST_MEMORY
+#pragma omp atomic read seq_cst
+        flen_dir = DIR(row - 1, col - 1);
+        flen = flen_dir < 0 ? 0 : flen_dir;
+#else
+#pragma omp atomic read seq_cst
+        flen = FLEN(row - 1, col - 1);
+#endif
+        if (!flen)
             return 0;
         if (flen + DIA_FLEN > max)
             max = flen + DIA_FLEN;
+        (*nup)++;
     }
     if (up & N) {
-        if (!(flen = GET_FLEN(row - 1, col)))
+#ifdef USE_LEAST_MEMORY
+#pragma omp atomic read seq_cst
+        flen_dir = DIR(row - 1, col);
+        flen = flen_dir < 0 ? 0 : flen_dir;
+#else
+#pragma omp atomic read seq_cst
+        flen = FLEN(row - 1, col);
+#endif
+        if (!flen)
             return 0;
         if (flen + ORTHO_FLEN > max)
             max = flen + ORTHO_FLEN;
+        (*nup)++;
     }
     if (up & NE) {
-        if (!(flen = GET_FLEN(row - 1, col + 1)))
+#ifdef USE_LEAST_MEMORY
+#pragma omp atomic read seq_cst
+        flen_dir = DIR(row - 1, col + 1);
+        flen = flen_dir < 0 ? 0 : flen_dir;
+#else
+#pragma omp atomic read seq_cst
+        flen = FLEN(row - 1, col + 1);
+#endif
+        if (!flen)
             return 0;
         if (flen + DIA_FLEN > max)
             max = flen + DIA_FLEN;
+        (*nup)++;
     }
     if (up & W) {
-        if (!(flen = GET_FLEN(row, col - 1)))
+#ifdef USE_LEAST_MEMORY
+#pragma omp atomic read seq_cst
+        flen_dir = DIR(row, col - 1);
+        flen = flen_dir < 0 ? 0 : flen_dir;
+#else
+#pragma omp atomic read seq_cst
+        flen = FLEN(row, col - 1);
+#endif
+        if (!flen)
             return 0;
         if (flen + ORTHO_FLEN > max)
             max = flen + ORTHO_FLEN;
+        (*nup)++;
     }
     if (up & E) {
-        if (!(flen = GET_FLEN(row, col + 1)))
+#ifdef USE_LEAST_MEMORY
+#pragma omp atomic read seq_cst
+        flen_dir = DIR(row, col + 1);
+        flen = flen_dir < 0 ? 0 : flen_dir;
+#else
+#pragma omp atomic read seq_cst
+        flen = FLEN(row, col + 1);
+#endif
+        if (!flen)
             return 0;
         if (flen + ORTHO_FLEN > max)
             max = flen + ORTHO_FLEN;
+        (*nup)++;
     }
     if (up & SW) {
-        if (!(flen = GET_FLEN(row + 1, col - 1)))
+#ifdef USE_LEAST_MEMORY
+#pragma omp atomic read seq_cst
+        flen_dir = DIR(row + 1, col - 1);
+        flen = flen_dir < 0 ? 0 : flen_dir;
+#else
+#pragma omp atomic read seq_cst
+        flen = FLEN(row + 1, col - 1);
+#endif
+        if (!flen)
             return 0;
         if (flen + DIA_FLEN > max)
             max = flen + DIA_FLEN;
+        (*nup)++;
     }
     if (up & S) {
-        if (!(flen = GET_FLEN(row + 1, col)))
+#ifdef USE_LEAST_MEMORY
+#pragma omp atomic read seq_cst
+        flen_dir = DIR(row + 1, col);
+        flen = flen_dir < 0 ? 0 : flen_dir;
+#else
+#pragma omp atomic read seq_cst
+        flen = FLEN(row + 1, col);
+#endif
+        if (!flen)
             return 0;
         if (flen + ORTHO_FLEN > max)
             max = flen + ORTHO_FLEN;
+        (*nup)++;
     }
     if (up & SE) {
-        if (!(flen = GET_FLEN(row + 1, col + 1)))
+#ifdef USE_LEAST_MEMORY
+#pragma omp atomic read seq_cst
+        flen_dir = DIR(row + 1, col + 1);
+        flen = flen_dir < 0 ? 0 : flen_dir;
+#else
+#pragma omp atomic read seq_cst
+        flen = FLEN(row + 1, col + 1);
+#endif
+        if (!flen)
             return 0;
         if (flen + DIA_FLEN > max)
             max = flen + DIA_FLEN;
+        (*nup)++;
     }
 
     return max;
