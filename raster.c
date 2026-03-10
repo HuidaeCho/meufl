@@ -859,7 +859,9 @@ void calc_md5(struct raster_map *rast_map)
         rast_map->nrows * rast_map->ncols *
         GDALGetDataTypeSizeBytes(data_type);
 
-    rast_map->md5 = malloc(MD5_DIGEST_LENGTH);
+    if (!rast_map->md5)
+        rast_map->md5 = malloc(MD5_DIGEST_LENGTH);
+
     EVP_Q_digest(NULL, "MD5", NULL, rast_map->cells.v, raster_size,
                  rast_map->md5, NULL);
 }

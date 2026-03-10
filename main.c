@@ -201,11 +201,12 @@ int main(int argc, char *argv[])
     if (use_lessmem != 2)
         free_raster(dir_map);
 
-    if (use_lessmem == 2)
-        dir_map->compress = compress_output;
-    else
-        flen_map->compress = compress_output;
     if (flen_path) {
+        if (use_lessmem == 2)
+            dir_map->compress = compress_output;
+        else
+            flen_map->compress = compress_output;
+
         printf("Writing flow length raster <%s>...\n", flen_path);
         gettimeofday(&start_time, NULL);
         if (write_raster
@@ -219,15 +220,15 @@ int main(int argc, char *argv[])
         printf("Output time for flow length: %lld microsec\n",
                timeval_diff(NULL, &end_time, &start_time));
     }
-    else {
-        printf("Calculating flow length MD5 hash...\n");
-        gettimeofday(&start_time, NULL);
-        printf("MD5: ");
-        print_md5(use_lessmem == 2 ? dir_map : flen_map);
-        gettimeofday(&end_time, NULL);
-        printf("MD5 hash time for flow length: %lld microsec\n",
-               timeval_diff(NULL, &end_time, &start_time));
-    }
+
+    printf("Calculating flow length MD5 hash...\n");
+    gettimeofday(&start_time, NULL);
+    printf("MD5: ");
+    print_md5(use_lessmem == 2 ? dir_map : flen_map);
+    gettimeofday(&end_time, NULL);
+    printf("MD5 hash time for flow length: %lld microsec\n",
+           timeval_diff(NULL, &end_time, &start_time));
+
     free_raster(use_lessmem == 2 ? dir_map : flen_map);
 
     gettimeofday(&end_time, NULL);
