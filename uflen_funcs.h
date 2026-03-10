@@ -17,12 +17,10 @@
 
 #ifdef USE_LEAST_MEMORY
 #define UFLEN uflen_leastmem
-#define UP(row, col) (unsigned char)(((int)DIR(row, col) - DIR(row, col)) * 256)
 #define SET_UP(row, col) do { \
-        DIR(row, col) = -DIR(row, col) - FIND_UP(row, col) / 256.; } while(0)
-#define GET_DIR(row, col) (unsigned char)abs(DIR(row, col))
-#define DIR(row, col) dir_map->cells.CELL_TYPE[INDEX(row, col)]
-#define FLEN(row, col) DIR(row, col)
+        FLEN(row, col) = -FLEN(row, col) - FIND_UP(row, col) / 256.; } while(0)
+#define GET_DIR(row, col) (unsigned char)abs(FLEN(row, col))
+#define FLEN(row, col) dir_map->cells.CELL_TYPE[INDEX(row, col)]
 #else
 #ifdef USE_LESS_MEMORY
 #define UFLEN uflen_lessmem
@@ -88,7 +86,7 @@ void UFLEN(struct raster_map *dir_map
 #pragma omp parallel for schedule(dynamic) private(col)
     for (row = 0; row < nrows; row++) {
         for (col = 0; col < ncols; col++)
-            if (DIR(row, col) == DIR_NULL)
+            if (FLEN(row, col) == DIR_NULL)
                 FLEN(row, col) = 0;
             else
                 SET_UP(row, col);
@@ -113,7 +111,7 @@ void UFLEN(struct raster_map *dir_map
             FLEN_TYPE flen_dir;
 
 #pragma omp atomic read seq_cst
-            flen_dir = DIR(row, col);
+            flen_dir = FLEN(row, col);
             if (flen_dir >= 0)
                 continue;
             dir = (unsigned char)abs(flen_dir);
@@ -218,7 +216,7 @@ static void trace_down(struct raster_map *dir_map
         next_col < ncols) {
 #ifdef USE_LEAST_MEMORY
 #pragma omp atomic read seq_cst
-        flen_dir = DIR(next_row, next_col);
+        flen_dir = FLEN(next_row, next_col);
         /* if the downstream cell is done, stop tracing down */
         if (flen_dir > 0)
             return;
@@ -308,7 +306,7 @@ static FLEN_TYPE max_up(
     FLEN_TYPE flen_dir;
 
 #pragma omp atomic read seq_cst
-    flen_dir = DIR(row, col);
+    flen_dir = FLEN(row, col);
     if (flen_dir > 0)
         return 0;
     up = (unsigned char)(((int)flen_dir - flen_dir) * 256);
@@ -320,7 +318,7 @@ static FLEN_TYPE max_up(
     if (up & NW) {
 #ifdef USE_LEAST_MEMORY
 #pragma omp atomic read seq_cst
-        flen_dir = DIR(row - 1, col - 1);
+        flen_dir = FLEN(row - 1, col - 1);
         flen = flen_dir < 0 ? 0 : flen_dir;
 #else
 #pragma omp atomic read seq_cst
@@ -335,7 +333,7 @@ static FLEN_TYPE max_up(
     if (up & N) {
 #ifdef USE_LEAST_MEMORY
 #pragma omp atomic read seq_cst
-        flen_dir = DIR(row - 1, col);
+        flen_dir = FLEN(row - 1, col);
         flen = flen_dir < 0 ? 0 : flen_dir;
 #else
 #pragma omp atomic read seq_cst
@@ -350,7 +348,7 @@ static FLEN_TYPE max_up(
     if (up & NE) {
 #ifdef USE_LEAST_MEMORY
 #pragma omp atomic read seq_cst
-        flen_dir = DIR(row - 1, col + 1);
+        flen_dir = FLEN(row - 1, col + 1);
         flen = flen_dir < 0 ? 0 : flen_dir;
 #else
 #pragma omp atomic read seq_cst
@@ -365,7 +363,7 @@ static FLEN_TYPE max_up(
     if (up & W) {
 #ifdef USE_LEAST_MEMORY
 #pragma omp atomic read seq_cst
-        flen_dir = DIR(row, col - 1);
+        flen_dir = FLEN(row, col - 1);
         flen = flen_dir < 0 ? 0 : flen_dir;
 #else
 #pragma omp atomic read seq_cst
@@ -380,7 +378,7 @@ static FLEN_TYPE max_up(
     if (up & E) {
 #ifdef USE_LEAST_MEMORY
 #pragma omp atomic read seq_cst
-        flen_dir = DIR(row, col + 1);
+        flen_dir = FLEN(row, col + 1);
         flen = flen_dir < 0 ? 0 : flen_dir;
 #else
 #pragma omp atomic read seq_cst
@@ -395,7 +393,7 @@ static FLEN_TYPE max_up(
     if (up & SW) {
 #ifdef USE_LEAST_MEMORY
 #pragma omp atomic read seq_cst
-        flen_dir = DIR(row + 1, col - 1);
+        flen_dir = FLEN(row + 1, col - 1);
         flen = flen_dir < 0 ? 0 : flen_dir;
 #else
 #pragma omp atomic read seq_cst
@@ -410,7 +408,7 @@ static FLEN_TYPE max_up(
     if (up & S) {
 #ifdef USE_LEAST_MEMORY
 #pragma omp atomic read seq_cst
-        flen_dir = DIR(row + 1, col);
+        flen_dir = FLEN(row + 1, col);
         flen = flen_dir < 0 ? 0 : flen_dir;
 #else
 #pragma omp atomic read seq_cst
@@ -425,7 +423,7 @@ static FLEN_TYPE max_up(
     if (up & SE) {
 #ifdef USE_LEAST_MEMORY
 #pragma omp atomic read seq_cst
-        flen_dir = DIR(row + 1, col + 1);
+        flen_dir = FLEN(row + 1, col + 1);
         flen = flen_dir < 0 ? 0 : flen_dir;
 #else
 #pragma omp atomic read seq_cst
