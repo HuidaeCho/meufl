@@ -174,7 +174,7 @@ static void trace_down(struct raster_map *dir_map
                        , int from_one, int row, int col, unsigned char dir)
 {
     int next_row = row, next_col = col;
-    unsigned char next_dir;
+    unsigned char next_dir = DIR_NULL;
     FLEN_TYPE flen_up;
     int nup;
 
@@ -214,20 +214,22 @@ static void trace_down(struct raster_map *dir_map
         break;
     }
 
+    if (next_row >= 0 && next_row < nrows && next_col >= 0 &&
+        next_col < ncols) {
 #ifdef USE_LEAST_MEMORY
 #pragma omp atomic read seq_cst
-    flen_dir = DIR(next_row, next_col);
-    /* if the downstream cell is done, stop tracing down */
-    if (flen_dir > 0)
-        return;
-    next_dir = (unsigned char)abs(flen_dir);
+        flen_dir = DIR(next_row, next_col);
+        /* if the downstream cell is done, stop tracing down */
+        if (flen_dir > 0)
+            return;
+        next_dir = (unsigned char)abs(flen_dir);
 #else
-    next_dir = GET_DIR(next_row, next_col);
+        next_dir = GET_DIR(next_row, next_col);
 #endif
+    }
 
     /* if the downstream cell is null, stop tracing down */
-    if (next_row < 0 || next_row >= nrows || next_col < 0 || next_col >= ncols
-        || next_dir == DIR_NULL) {
+    if (next_dir == DIR_NULL) {
         if (from_one)
             /* updating a terminal cell does not require atomicity because no
              * other threads will check its value */
