@@ -142,7 +142,7 @@ int main(int argc, char *argv[])
             printf("\n");
         printf("Usage: meufl OPTIONS dir\n\n"
                "  dir\t\tInput flow direction raster (e.g., gpkg:file.gpkg:layer)\n"
-               "  -o uflen\tOutput upstream flow length GeoTIFF (default: print MD5)\n"
+               "  -o uflen\tOutput upstream flow length GeoTIFF (default: only print MD5)\n"
                "  -1\t\tCount from 1 (default: 0)\n"
                "  -l\t\tUse less memory\n"
                "  -L\t\tUse least memory\n"
