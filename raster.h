@@ -35,6 +35,7 @@ struct raster_map
     double max;
     double mean;
     double sd;
+    unsigned char *md5;
 };
 
 /* raster.c */
@@ -48,6 +49,8 @@ void copy_raster_metadata(struct raster_map *, const struct raster_map *);
 struct raster_map *read_raster(const char *, const char *, int, int,
                                double (*)(double, void *), void *);
 int write_raster(const char *, struct raster_map *, int);
+void calc_md5(struct raster_map *);
+void print_md5(struct raster_map *);
 void calc_row_col(struct raster_map *, double, double, int *, int *);
 void calc_coors(struct raster_map *, int, int, double *, double *);
 

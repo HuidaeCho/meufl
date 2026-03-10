@@ -2,7 +2,10 @@
 #include <gdal.h>
 #include <cpl_string.h>
 #include <omp.h>
+#include <openssl/evp.h>
 #include "raster.h"
+
+#define MD5_DIGEST_LENGTH 16
 
 void print_raster(const char *path, const char *opts, const char *null_str,
                   const char *fmt)
@@ -291,6 +294,7 @@ struct raster_map *init_raster(int nrows, int ncols, int type)
         rast_map->geotransform[i] = 0;
     rast_map->dx = rast_map->dy = 1;
     rast_map->compress = 0;
+    rast_map->md5 = NULL;
 
     return rast_map;
 }
@@ -299,6 +303,8 @@ void free_raster(struct raster_map *rast_map)
 {
     free(rast_map->cells.v);
     free(rast_map->projection);
+    if (rast_map->md5)
+        free(rast_map->md5);
 }
 
 void copy_raster_metadata(struct raster_map *dest_map,
@@ -735,7 +741,6 @@ int write_raster(const char *path, struct raster_map *rast_map, int type)
     GDALDatasetH dataset;
     GDALRasterBandH band;
     GDALDataType data_type, gdt_type;
-    size_t row_size;
 
     if (!driver)
         return 1;
@@ -746,8 +751,6 @@ int write_raster(const char *path, struct raster_map *rast_map, int type)
 
     if (rast_map->compress)
         options = CSLSetNameValue(options, "COMPRESS", "ZSTD");
-
-    row_size = rast_map->ncols;
 
     /* actual data size */
     switch (rast_map->type) {
@@ -773,7 +776,6 @@ int write_raster(const char *path, struct raster_map *rast_map, int type)
         data_type = GDT_Byte;
         break;
     }
-    row_size *= GDALGetDataTypeSizeBytes(data_type);
 
     /* requested data type */
     gdt_type = data_type;
@@ -822,6 +824,56 @@ int write_raster(const char *path, struct raster_map *rast_map, int type)
     GDALClose(dataset);
 
     return 0;
+}
+
+void calc_md5(struct raster_map *rast_map)
+{
+    GDALDataType data_type;
+    size_t raster_size;
+
+    /* actual data size */
+    switch (rast_map->type) {
+    case RASTER_MAP_TYPE_FLOAT64:
+        data_type = GDT_Float64;
+        break;
+    case RASTER_MAP_TYPE_FLOAT32:
+        data_type = GDT_Float32;
+        break;
+    case RASTER_MAP_TYPE_UINT32:
+        data_type = GDT_UInt32;
+        break;
+    case RASTER_MAP_TYPE_INT32:
+        data_type = GDT_Int32;
+        break;
+    case RASTER_MAP_TYPE_UINT16:
+        data_type = GDT_UInt16;
+        break;
+    case RASTER_MAP_TYPE_INT16:
+        data_type = GDT_Int16;
+        break;
+    default:
+        data_type = GDT_Byte;
+        break;
+    }
+    raster_size =
+        rast_map->nrows * rast_map->ncols *
+        GDALGetDataTypeSizeBytes(data_type);
+
+    rast_map->md5 = malloc(MD5_DIGEST_LENGTH);
+    EVP_Q_digest(NULL, "MD5", NULL, rast_map->cells.v, raster_size,
+                 rast_map->md5, NULL);
+}
+
+void print_md5(struct raster_map *rast_map)
+{
+    int i;
+
+    if (!rast_map->md5)
+        calc_md5(rast_map);
+
+    for (i = 0; i < MD5_DIGEST_LENGTH; i++)
+        printf("%02x", rast_map->md5[i]);
+    printf("\n");
 }
 
 void calc_row_col(struct raster_map *rast_map, double x, double y,

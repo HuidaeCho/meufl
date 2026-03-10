@@ -32,6 +32,15 @@ int main(int argc, char *argv[])
 
             for (j = 1; j < n && !unknown; j++) {
                 switch (argv[i][j]) {
+                case 'o':
+                    if (i == argc - 1) {
+                        fprintf(stderr, "-%c: Missing output filename\n",
+                                argv[i][j]);
+                        print_usage = 2;
+                        break;
+                    }
+                    flen_path = argv[++i];
+                    break;
                 case '1':
                     from_one = 1;
                     break;
@@ -116,10 +125,8 @@ int main(int argc, char *argv[])
                 break;
             }
         }
-        else if (!dir_path)
+        else if (!dir_path) {
             dir_path = argv[i];
-        else if (!flen_path) {
-            flen_path = argv[i];
             print_usage = 0;
         }
         else {
@@ -133,9 +140,9 @@ int main(int argc, char *argv[])
     if (print_usage) {
         if (print_usage == 2)
             printf("\n");
-        printf("Usage: meufl OPTIONS dir uflen\n\n"
+        printf("Usage: meufl OPTIONS dir\n\n"
                "  dir\t\tInput flow direction raster (e.g., gpkg:file.gpkg:layer)\n"
-               "  uflen\t\tOutput upstream flow length GeoTIFF\n"
+               "  -o uflen\tOutput upstream flow length GeoTIFF (default: print MD5)\n"
                "  -1\t\tCount from 1 (default: 0)\n"
                "  -l\t\tUse less memory\n"
                "  -L\t\tUse least memory\n"
@@ -147,7 +154,7 @@ int main(int argc, char *argv[])
                "\t\tdegree: (0,360] (E-E CCW)\n"
                "\t\tE,SE,S,SW,W,NW,N,NE: custom (e.g., 1,8,7,6,5,4,3,2 for taudem)\n"
                "  -D opts\tComma-separated list of GDAL options for dir\n"
-               "  -t threads\tNumber of threads (default OMP_NUM_THREADS)\n");
+               "  -t threads\tNumber of threads (default: OMP_NUM_THREADS)\n");
         exit(print_usage == 1 ? EXIT_SUCCESS : EXIT_FAILURE);
     }
 
@@ -198,18 +205,29 @@ int main(int argc, char *argv[])
         dir_map->compress = compress_output;
     else
         flen_map->compress = compress_output;
-    printf("Writing flow length raster <%s>...\n", flen_path);
-    gettimeofday(&start_time, NULL);
-    if (write_raster
-        (flen_path, use_lessmem == 2 ? dir_map : flen_map,
-         RASTER_MAP_TYPE_AUTO) > 0) {
-        printf("%s: Failed to write flow length raster\n", flen_path);
-        free_raster(use_lessmem == 2 ? dir_map : flen_map);
-        exit(EXIT_FAILURE);
+    if (flen_path) {
+        printf("Writing flow length raster <%s>...\n", flen_path);
+        gettimeofday(&start_time, NULL);
+        if (write_raster
+            (flen_path, use_lessmem == 2 ? dir_map : flen_map,
+             RASTER_MAP_TYPE_AUTO) > 0) {
+            printf("%s: Failed to write flow length raster\n", flen_path);
+            free_raster(use_lessmem == 2 ? dir_map : flen_map);
+            exit(EXIT_FAILURE);
+        }
+        gettimeofday(&end_time, NULL);
+        printf("Output time for flow length: %lld microsec\n",
+               timeval_diff(NULL, &end_time, &start_time));
     }
-    gettimeofday(&end_time, NULL);
-    printf("Output time for flow length: %lld microsec\n",
-           timeval_diff(NULL, &end_time, &start_time));
+    else {
+        printf("Calculating flow length MD5 hash...\n");
+        gettimeofday(&start_time, NULL);
+        printf("MD5: ");
+        print_md5(use_lessmem == 2 ? dir_map : flen_map);
+        gettimeofday(&end_time, NULL);
+        printf("MD5 hash time for flow length: %lld microsec\n",
+               timeval_diff(NULL, &end_time, &start_time));
+    }
     free_raster(use_lessmem == 2 ? dir_map : flen_map);
 
     gettimeofday(&end_time, NULL);
