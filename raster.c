@@ -856,7 +856,7 @@ void calc_md5(struct raster_map *rast_map)
         break;
     }
     raster_size =
-        rast_map->nrows * rast_map->ncols *
+        (size_t)rast_map->nrows * rast_map->ncols *
         GDALGetDataTypeSizeBytes(data_type);
 
     if (!rast_map->md5)
