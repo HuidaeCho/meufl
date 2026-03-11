@@ -20,6 +20,7 @@
 #define GET_DIR(row, col) (unsigned char)abs(FLEN(row, col))
 #define FLEN(row, col) dir_map->cells.CELL_TYPE[INDEX(row, col)]
 #else
+
 #ifdef USE_LESS_MEMORY
 #define UFLEN uflen_lessmem
 #define UP(row, col) FIND_UP(row, col)
@@ -28,6 +29,7 @@
 #define UP(row, col) up_cells[INDEX(row, col)]
 static unsigned char *up_cells;
 #endif
+
 #define DIR(row, col) dir_map->cells.byte[INDEX(row, col)]
 #define GET_DIR(row, col) DIR(row, col)
 #define FLEN(row, col) flen_map->cells.CELL_TYPE[INDEX(row, col)]
