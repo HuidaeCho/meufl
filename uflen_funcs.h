@@ -268,13 +268,14 @@ static void trace_down(struct raster_map *dir_map
             FLEN(next_row, next_col) = flen_up;
         }
         else {
-            /* otherwise, we need to check this value again because FLEN(next_row, next_col)
-             * could change between atomic read and atomic compare capture */
+            /* otherwise, we need to check this value again because
+             * FLEN(next_row, next_col) could change between atomic read and
+             * atomic compare capture */
             expected = FLEN(next_row, next_col);
         }
 
-        /* at this point, if the current thread owned the next cell, expected <= 0;
-         * otherwise, expected > 0 */
+        /* at this point, if the current thread owned the next cell, expected
+         * <= 0; otherwise, expected > 0 */
         if (expected > 0)
             return;
     }
