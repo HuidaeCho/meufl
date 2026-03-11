@@ -9,8 +9,6 @@
 #define CELL_TYPE float32
 #define FLEN_TYPE float
 #endif
-#define ORTHO_FLEN ortho_flen
-#define DIA_FLEN dia_flen
 
 #define INDEX(row, col) (size_t)(row) * ncols + (col)
 #define DIR_NULL (unsigned char)dir_map->null_value
@@ -326,8 +324,8 @@ static FLEN_TYPE max_up(
 #endif
         if (!flen)
             return 0;
-        if (flen + DIA_FLEN > max)
-            max = flen + DIA_FLEN;
+        if (flen + dia_flen > max)
+            max = flen + dia_flen;
         (*nup)++;
     }
     if (up & N) {
@@ -341,8 +339,8 @@ static FLEN_TYPE max_up(
 #endif
         if (!flen)
             return 0;
-        if (flen + ORTHO_FLEN > max)
-            max = flen + ORTHO_FLEN;
+        if (flen + ortho_flen > max)
+            max = flen + ortho_flen;
         (*nup)++;
     }
     if (up & NE) {
@@ -356,8 +354,8 @@ static FLEN_TYPE max_up(
 #endif
         if (!flen)
             return 0;
-        if (flen + DIA_FLEN > max)
-            max = flen + DIA_FLEN;
+        if (flen + dia_flen > max)
+            max = flen + dia_flen;
         (*nup)++;
     }
     if (up & W) {
@@ -371,8 +369,8 @@ static FLEN_TYPE max_up(
 #endif
         if (!flen)
             return 0;
-        if (flen + ORTHO_FLEN > max)
-            max = flen + ORTHO_FLEN;
+        if (flen + ortho_flen > max)
+            max = flen + ortho_flen;
         (*nup)++;
     }
     if (up & E) {
@@ -386,8 +384,8 @@ static FLEN_TYPE max_up(
 #endif
         if (!flen)
             return 0;
-        if (flen + ORTHO_FLEN > max)
-            max = flen + ORTHO_FLEN;
+        if (flen + ortho_flen > max)
+            max = flen + ortho_flen;
         (*nup)++;
     }
     if (up & SW) {
@@ -401,8 +399,8 @@ static FLEN_TYPE max_up(
 #endif
         if (!flen)
             return 0;
-        if (flen + DIA_FLEN > max)
-            max = flen + DIA_FLEN;
+        if (flen + dia_flen > max)
+            max = flen + dia_flen;
         (*nup)++;
     }
     if (up & S) {
@@ -416,8 +414,8 @@ static FLEN_TYPE max_up(
 #endif
         if (!flen)
             return 0;
-        if (flen + ORTHO_FLEN > max)
-            max = flen + ORTHO_FLEN;
+        if (flen + ortho_flen > max)
+            max = flen + ortho_flen;
         (*nup)++;
     }
     if (up & SE) {
@@ -431,8 +429,8 @@ static FLEN_TYPE max_up(
 #endif
         if (!flen)
             return 0;
-        if (flen + DIA_FLEN > max)
-            max = flen + DIA_FLEN;
+        if (flen + dia_flen > max)
+            max = flen + dia_flen;
         (*nup)++;
     }
 
