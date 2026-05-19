@@ -148,7 +148,7 @@ int main(int argc, char *argv[])
                "  -L\t\tUse least memory\n"
                "  -z\t\tCompress output GeoTIFF\n"
                "  -e encoding\tInput flow direction encoding\n"
-               "\t\tpower2 (default): 2^0-7 CW from E (e.g., r.terraflow, ArcGIS)\n"
+               "\t\tpower2 (default): 2^0-7 (E-NE CW) (e.g., r.terraflow, ArcGIS)\n"
                "\t\ttaudem: 1-8 (E-SE CCW) (e.g., d8flowdir)\n"
                "\t\t45degree: 1-8 (NE-E CCW) (e.g., r.watershed)\n"
                "\t\tdegree: (0,360] (E-E CCW)\n"
