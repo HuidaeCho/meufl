@@ -2,7 +2,7 @@
 #include <math.h>
 #include "global.h"
 
-#if LENGTH_RASTER_TYPE == RASTER_TYPE_FLOAT64
+#ifdef USE_FLOAT64_LENGTH
 #define RASTER_TYPE float64
 #define FLEN_TYPE double
 #else
