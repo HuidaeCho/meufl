@@ -15,7 +15,8 @@
 int main(int argc, char *argv[])
 {
     int i;
-    int print_usage = 1, from_one = 0, use_lessmem = 0, compress_output = 0;
+    int print_usage = 1, calc_md5 = 0, from_one = 0, use_lessmem =
+        0, compress_output = 0;
     double (*recode)(double, void *) = NULL;
     int *recode_data = NULL, encoding[8];
     char *dir_path = NULL, *dir_opts = NULL, *flen_path = NULL;
@@ -40,6 +41,9 @@ int main(int argc, char *argv[])
                         break;
                     }
                     flen_path = argv[++i];
+                    break;
+                case 'm':
+                    calc_md5 = 1;
                     break;
                 case '1':
                     from_one = 1;
@@ -137,12 +141,18 @@ int main(int argc, char *argv[])
         }
     }
 
+    if (!flen_path && !calc_md5) {
+        fprintf(stderr, "Either -o or -m is required\n");
+        print_usage = 2;
+    }
+
     if (print_usage) {
         if (print_usage == 2)
             printf("\n");
         printf("Usage: meufl OPTIONS dir\n\n"
                "  dir\t\tInput flow direction raster (e.g., gpkg:file.gpkg:layer)\n"
-               "  -o uflen\tOutput upstream flow length GeoTIFF (default: only print MD5)\n"
+               "  -o uflen\tOutput upstream flow length GeoTIFF (or -m required)\n"
+               "  -m\t\tCalculate MD5 (or -o required)\n"
                "  -1\t\tCount from 1 (default: 0)\n"
                "  -l\t\tUse less memory\n"
                "  -L\t\tUse least memory\n"
@@ -176,7 +186,7 @@ int main(int argc, char *argv[])
     printf("Reading flow direction raster <%s>...\n", dir_path);
     gettimeofday(&start_time, NULL);
     if (!(dir_map = read_raster(dir_path, dir_opts, use_lessmem == 2 ?
-                                LENGTH_RASTER_TYPE : RASTER_MAP_TYPE_BYTE, 0,
+                                LENGTH_RASTER_TYPE : RASTER_TYPE_BYTE, 0,
                                 recode, recode_data))) {
         fprintf(stderr, "%s: Failed to read flow direction raster\n",
                 dir_path);
@@ -211,7 +221,7 @@ int main(int argc, char *argv[])
         gettimeofday(&start_time, NULL);
         if (write_raster
             (flen_path, use_lessmem == 2 ? dir_map : flen_map,
-             RASTER_MAP_TYPE_AUTO) > 0) {
+             RASTER_TYPE_AUTO) > 0) {
             printf("%s: Failed to write flow length raster\n", flen_path);
             free_raster(use_lessmem == 2 ? dir_map : flen_map);
             exit(EXIT_FAILURE);
@@ -221,13 +231,15 @@ int main(int argc, char *argv[])
                timeval_diff(NULL, &end_time, &start_time));
     }
 
-    printf("Calculating flow length MD5 hash...\n");
-    gettimeofday(&start_time, NULL);
-    printf("MD5: ");
-    print_md5(use_lessmem == 2 ? dir_map : flen_map);
-    gettimeofday(&end_time, NULL);
-    printf("MD5 hash time for flow length: %lld microsec\n",
-           timeval_diff(NULL, &end_time, &start_time));
+    if (calc_md5) {
+        printf("Calculating flow length MD5 hash...\n");
+        gettimeofday(&start_time, NULL);
+        printf("MD5: ");
+        print_md5(use_lessmem == 2 ? dir_map : flen_map);
+        gettimeofday(&end_time, NULL);
+        printf("MD5 hash time for flow length: %lld microsec\n",
+               timeval_diff(NULL, &end_time, &start_time));
+    }
 
     free_raster(use_lessmem == 2 ? dir_map : flen_map);
 

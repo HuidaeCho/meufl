@@ -24,9 +24,9 @@ int gettimeofday(struct timeval *, struct timezone *);
 #define E 1
 
 #ifdef USE_FLOAT64_LENGTH
-#define LENGTH_RASTER_TYPE RASTER_MAP_TYPE_FLOAT64
+#define LENGTH_RASTER_TYPE RASTER_TYPE_FLOAT64
 #else
-#define LENGTH_RASTER_TYPE RASTER_MAP_TYPE_FLOAT32
+#define LENGTH_RASTER_TYPE RASTER_TYPE_FLOAT32
 #endif
 
 /* timeval_diff.c */

@@ -16,18 +16,18 @@ void print_raster(const char *path, const char *opts, const char *null_str,
     int row, col;
 
     if (!(rast_map =
-          read_raster(path, opts, RASTER_MAP_TYPE_AUTO, 1, NULL, NULL)))
+          read_raster(path, opts, RASTER_TYPE_AUTO, 1, NULL, NULL)))
         return;
 
     switch (rast_map->type) {
-    case RASTER_MAP_TYPE_FLOAT64:
+    case RASTER_TYPE_FLOAT64:
         type_format = "lf";
         break;
-    case RASTER_MAP_TYPE_FLOAT32:
+    case RASTER_TYPE_FLOAT32:
         type_format = "f";
         break;
-    case RASTER_MAP_TYPE_UINT32:
-    case RASTER_MAP_TYPE_UINT16:
+    case RASTER_TYPE_UINT32:
+    case RASTER_TYPE_UINT16:
         type_format = "u";
         break;
     default:
@@ -97,8 +97,8 @@ void print_raster(const char *path, const char *opts, const char *null_str,
     }
     else {
         switch (rast_map->type) {
-        case RASTER_MAP_TYPE_FLOAT64:
-        case RASTER_MAP_TYPE_FLOAT32:
+        case RASTER_TYPE_FLOAT64:
+        case RASTER_TYPE_FLOAT32:
             sprintf(format, "%%%d.%d%s%%s", width + 4, 3, type_format);
             break;
         default:
@@ -116,22 +116,22 @@ void print_raster(const char *path, const char *opts, const char *null_str,
                 printf("%*s%s", width, null_str, sep);
             else {
                 switch (rast_map->type) {
-                case RASTER_MAP_TYPE_FLOAT64:
+                case RASTER_TYPE_FLOAT64:
                     printf(format, rast_map->cells.float64[idx], sep);
                     break;
-                case RASTER_MAP_TYPE_FLOAT32:
+                case RASTER_TYPE_FLOAT32:
                     printf(format, rast_map->cells.float32[idx], sep);
                     break;
-                case RASTER_MAP_TYPE_UINT32:
+                case RASTER_TYPE_UINT32:
                     printf(format, rast_map->cells.uint32[idx], sep);
                     break;
-                case RASTER_MAP_TYPE_INT32:
+                case RASTER_TYPE_INT32:
                     printf(format, rast_map->cells.int32[idx], sep);
                     break;
-                case RASTER_MAP_TYPE_UINT16:
+                case RASTER_TYPE_UINT16:
                     printf(format, rast_map->cells.uint16[idx], sep);
                     break;
-                case RASTER_MAP_TYPE_INT16:
+                case RASTER_TYPE_INT16:
                     printf(format, rast_map->cells.int16[idx], sep);
                     break;
                 default:
@@ -152,24 +152,24 @@ int is_null(struct raster_map *rast_map, int row, int col)
     size_t idx = (size_t)row * rast_map->ncols + col;
 
     switch (rast_map->type) {
-    case RASTER_MAP_TYPE_FLOAT64:
+    case RASTER_TYPE_FLOAT64:
         ret = rast_map->cells.float64[idx] == rast_map->null_value ||
             isnan(rast_map->cells.float64[idx]);
         break;
-    case RASTER_MAP_TYPE_FLOAT32:
+    case RASTER_TYPE_FLOAT32:
         ret = rast_map->cells.float32[idx] == rast_map->null_value ||
             isnan(rast_map->cells.float32[idx]);
         break;
-    case RASTER_MAP_TYPE_UINT32:
+    case RASTER_TYPE_UINT32:
         ret = rast_map->cells.uint32[idx] == rast_map->null_value;
         break;
-    case RASTER_MAP_TYPE_INT32:
+    case RASTER_TYPE_INT32:
         ret = rast_map->cells.int32[idx] == rast_map->null_value;
         break;
-    case RASTER_MAP_TYPE_UINT16:
+    case RASTER_TYPE_UINT16:
         ret = rast_map->cells.uint16[idx] == rast_map->null_value;
         break;
-    case RASTER_MAP_TYPE_INT16:
+    case RASTER_TYPE_INT16:
         ret = rast_map->cells.int16[idx] == rast_map->null_value;
         break;
     default:
@@ -184,22 +184,22 @@ void set_null(struct raster_map *rast_map, int row, int col)
     size_t idx = (size_t)row * rast_map->ncols + col;
 
     switch (rast_map->type) {
-    case RASTER_MAP_TYPE_FLOAT64:
+    case RASTER_TYPE_FLOAT64:
         rast_map->cells.float64[idx] = rast_map->null_value;
         break;
-    case RASTER_MAP_TYPE_FLOAT32:
+    case RASTER_TYPE_FLOAT32:
         rast_map->cells.float32[idx] = rast_map->null_value;
         break;
-    case RASTER_MAP_TYPE_UINT32:
+    case RASTER_TYPE_UINT32:
         rast_map->cells.uint32[idx] = rast_map->null_value;
         break;
-    case RASTER_MAP_TYPE_INT32:
+    case RASTER_TYPE_INT32:
         rast_map->cells.int32[idx] = rast_map->null_value;
         break;
-    case RASTER_MAP_TYPE_UINT16:
+    case RASTER_TYPE_UINT16:
         rast_map->cells.uint16[idx] = rast_map->null_value;
         break;
-    case RASTER_MAP_TYPE_INT16:
+    case RASTER_TYPE_INT16:
         rast_map->cells.int16[idx] = rast_map->null_value;
         break;
     default:
@@ -218,29 +218,29 @@ void reset_null(struct raster_map *rast_map, double null_value)
             size_t idx = (size_t)row * rast_map->ncols + col;
 
             switch (rast_map->type) {
-            case RASTER_MAP_TYPE_FLOAT64:
+            case RASTER_TYPE_FLOAT64:
                 if (rast_map->cells.float64[idx] == rast_map->null_value ||
                     isnan(rast_map->cells.float64[idx]))
                     rast_map->cells.float64[idx] = null_value;
                 break;
-            case RASTER_MAP_TYPE_FLOAT32:
+            case RASTER_TYPE_FLOAT32:
                 if (rast_map->cells.float32[idx] == rast_map->null_value ||
                     isnan(rast_map->cells.float32[idx]))
                     rast_map->cells.float32[idx] = null_value;
                 break;
-            case RASTER_MAP_TYPE_UINT32:
+            case RASTER_TYPE_UINT32:
                 if (rast_map->cells.uint32[idx] == rast_map->null_value)
                     rast_map->cells.uint32[idx] = null_value;
                 break;
-            case RASTER_MAP_TYPE_INT32:
+            case RASTER_TYPE_INT32:
                 if (rast_map->cells.int32[idx] == rast_map->null_value)
                     rast_map->cells.int32[idx] = null_value;
                 break;
-            case RASTER_MAP_TYPE_UINT16:
+            case RASTER_TYPE_UINT16:
                 if (rast_map->cells.uint16[idx] == rast_map->null_value)
                     rast_map->cells.uint16[idx] = null_value;
                 break;
-            case RASTER_MAP_TYPE_INT16:
+            case RASTER_TYPE_INT16:
                 if (rast_map->cells.int16[idx] == rast_map->null_value)
                     rast_map->cells.int16[idx] = null_value;
                 break;
@@ -266,22 +266,22 @@ struct raster_map *init_raster(int nrows, int ncols, int type)
     rast_map->type = type;
 
     switch (type) {
-    case RASTER_MAP_TYPE_FLOAT64:
+    case RASTER_TYPE_FLOAT64:
         row_size *= sizeof(double);
         break;
-    case RASTER_MAP_TYPE_FLOAT32:
+    case RASTER_TYPE_FLOAT32:
         row_size *= sizeof(float);
         break;
-    case RASTER_MAP_TYPE_UINT32:
+    case RASTER_TYPE_UINT32:
         row_size *= sizeof(unsigned int);
         break;
-    case RASTER_MAP_TYPE_INT32:
+    case RASTER_TYPE_INT32:
         row_size *= sizeof(int);
         break;
-    case RASTER_MAP_TYPE_UINT16:
+    case RASTER_TYPE_UINT16:
         row_size *= sizeof(unsigned short);
         break;
-    case RASTER_MAP_TYPE_INT16:
+    case RASTER_TYPE_INT16:
         row_size *= sizeof(short);
         break;
     }
@@ -384,49 +384,49 @@ struct raster_map *read_raster(const char *path, const char *opts, int type,
         gdt_row_size = row_size * GDALGetDataTypeSizeBytes(gdt_type);
 
         switch (type) {
-        case RASTER_MAP_TYPE_FLOAT64:
+        case RASTER_TYPE_FLOAT64:
             rast_type = GDT_Float64;
             break;
-        case RASTER_MAP_TYPE_FLOAT32:
+        case RASTER_TYPE_FLOAT32:
             rast_type = GDT_Float32;
             break;
-        case RASTER_MAP_TYPE_UINT32:
+        case RASTER_TYPE_UINT32:
             rast_type = GDT_UInt32;
             break;
-        case RASTER_MAP_TYPE_INT32:
+        case RASTER_TYPE_INT32:
             rast_type = GDT_Int32;
             break;
-        case RASTER_MAP_TYPE_UINT16:
+        case RASTER_TYPE_UINT16:
             rast_type = GDT_UInt16;
             break;
-        case RASTER_MAP_TYPE_INT16:
+        case RASTER_TYPE_INT16:
             rast_type = GDT_Int16;
             break;
-        case RASTER_MAP_TYPE_BYTE:
+        case RASTER_TYPE_BYTE:
             rast_type = GDT_Byte;
             break;
         default:
             switch (gdt_type) {
             case GDT_Float64:
-                rast_type = RASTER_MAP_TYPE_FLOAT64;
+                rast_type = RASTER_TYPE_FLOAT64;
                 break;
             case GDT_Float32:
-                rast_type = RASTER_MAP_TYPE_FLOAT32;
+                rast_type = RASTER_TYPE_FLOAT32;
                 break;
             case GDT_UInt32:
-                rast_type = RASTER_MAP_TYPE_UINT32;
+                rast_type = RASTER_TYPE_UINT32;
                 break;
             case GDT_Int32:
-                rast_type = RASTER_MAP_TYPE_INT32;
+                rast_type = RASTER_TYPE_INT32;
                 break;
             case GDT_UInt16:
-                rast_type = RASTER_MAP_TYPE_UINT16;
+                rast_type = RASTER_TYPE_UINT16;
                 break;
             case GDT_Int16:
-                rast_type = RASTER_MAP_TYPE_INT16;
+                rast_type = RASTER_TYPE_INT16;
                 break;
             case GDT_Byte:
-                rast_type = RASTER_MAP_TYPE_BYTE;
+                rast_type = RASTER_TYPE_BYTE;
                 break;
             default:
                 fprintf(stderr, "Unsupported GDAL type\n");
@@ -659,49 +659,49 @@ struct raster_map *read_raster(const char *path, const char *opts, int type,
     }
     else {
         switch (type) {
-        case RASTER_MAP_TYPE_FLOAT64:
+        case RASTER_TYPE_FLOAT64:
             gdt_type = GDT_Float64;
             break;
-        case RASTER_MAP_TYPE_FLOAT32:
+        case RASTER_TYPE_FLOAT32:
             gdt_type = GDT_Float32;
             break;
-        case RASTER_MAP_TYPE_UINT32:
+        case RASTER_TYPE_UINT32:
             gdt_type = GDT_UInt32;
             break;
-        case RASTER_MAP_TYPE_INT32:
+        case RASTER_TYPE_INT32:
             gdt_type = GDT_Int32;
             break;
-        case RASTER_MAP_TYPE_UINT16:
+        case RASTER_TYPE_UINT16:
             gdt_type = GDT_UInt16;
             break;
-        case RASTER_MAP_TYPE_INT16:
+        case RASTER_TYPE_INT16:
             gdt_type = GDT_Int16;
             break;
-        case RASTER_MAP_TYPE_BYTE:
+        case RASTER_TYPE_BYTE:
             gdt_type = GDT_Byte;
             break;
         default:
             switch ((gdt_type = GDALGetRasterDataType(band))) {
             case GDT_Float64:
-                type = RASTER_MAP_TYPE_FLOAT64;
+                type = RASTER_TYPE_FLOAT64;
                 break;
             case GDT_Float32:
-                type = RASTER_MAP_TYPE_FLOAT32;
+                type = RASTER_TYPE_FLOAT32;
                 break;
             case GDT_UInt32:
-                type = RASTER_MAP_TYPE_UINT32;
+                type = RASTER_TYPE_UINT32;
                 break;
             case GDT_Int32:
-                type = RASTER_MAP_TYPE_INT32;
+                type = RASTER_TYPE_INT32;
                 break;
             case GDT_UInt16:
-                type = RASTER_MAP_TYPE_UINT16;
+                type = RASTER_TYPE_UINT16;
                 break;
             case GDT_Int16:
-                type = RASTER_MAP_TYPE_INT16;
+                type = RASTER_TYPE_INT16;
                 break;
             case GDT_Byte:
-                type = RASTER_MAP_TYPE_BYTE;
+                type = RASTER_TYPE_BYTE;
                 break;
             default:
                 fprintf(stderr, "Unsupported GDAL type\n");
@@ -754,22 +754,22 @@ int write_raster(const char *path, struct raster_map *rast_map, int type)
 
     /* actual data size */
     switch (rast_map->type) {
-    case RASTER_MAP_TYPE_FLOAT64:
+    case RASTER_TYPE_FLOAT64:
         data_type = GDT_Float64;
         break;
-    case RASTER_MAP_TYPE_FLOAT32:
+    case RASTER_TYPE_FLOAT32:
         data_type = GDT_Float32;
         break;
-    case RASTER_MAP_TYPE_UINT32:
+    case RASTER_TYPE_UINT32:
         data_type = GDT_UInt32;
         break;
-    case RASTER_MAP_TYPE_INT32:
+    case RASTER_TYPE_INT32:
         data_type = GDT_Int32;
         break;
-    case RASTER_MAP_TYPE_UINT16:
+    case RASTER_TYPE_UINT16:
         data_type = GDT_UInt16;
         break;
-    case RASTER_MAP_TYPE_INT16:
+    case RASTER_TYPE_INT16:
         data_type = GDT_Int16;
         break;
     default:
@@ -779,24 +779,24 @@ int write_raster(const char *path, struct raster_map *rast_map, int type)
 
     /* requested data type */
     gdt_type = data_type;
-    if (type != RASTER_MAP_TYPE_AUTO && type != rast_map->type)
+    if (type != RASTER_TYPE_AUTO && type != rast_map->type)
         switch (type) {
-        case RASTER_MAP_TYPE_FLOAT64:
+        case RASTER_TYPE_FLOAT64:
             gdt_type = GDT_Float64;
             break;
-        case RASTER_MAP_TYPE_FLOAT32:
+        case RASTER_TYPE_FLOAT32:
             gdt_type = GDT_Float32;
             break;
-        case RASTER_MAP_TYPE_UINT32:
+        case RASTER_TYPE_UINT32:
             gdt_type = GDT_UInt32;
             break;
-        case RASTER_MAP_TYPE_INT32:
+        case RASTER_TYPE_INT32:
             gdt_type = GDT_Int32;
             break;
-        case RASTER_MAP_TYPE_UINT16:
+        case RASTER_TYPE_UINT16:
             gdt_type = GDT_UInt16;
             break;
-        case RASTER_MAP_TYPE_INT16:
+        case RASTER_TYPE_INT16:
             gdt_type = GDT_Int16;
             break;
         default:
@@ -833,22 +833,22 @@ void calc_md5(struct raster_map *rast_map)
 
     /* actual data size */
     switch (rast_map->type) {
-    case RASTER_MAP_TYPE_FLOAT64:
+    case RASTER_TYPE_FLOAT64:
         data_type = GDT_Float64;
         break;
-    case RASTER_MAP_TYPE_FLOAT32:
+    case RASTER_TYPE_FLOAT32:
         data_type = GDT_Float32;
         break;
-    case RASTER_MAP_TYPE_UINT32:
+    case RASTER_TYPE_UINT32:
         data_type = GDT_UInt32;
         break;
-    case RASTER_MAP_TYPE_INT32:
+    case RASTER_TYPE_INT32:
         data_type = GDT_Int32;
         break;
-    case RASTER_MAP_TYPE_UINT16:
+    case RASTER_TYPE_UINT16:
         data_type = GDT_UInt16;
         break;
-    case RASTER_MAP_TYPE_INT16:
+    case RASTER_TYPE_INT16:
         data_type = GDT_Int16;
         break;
     default:

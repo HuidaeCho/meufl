@@ -2,11 +2,11 @@
 #include <math.h>
 #include "global.h"
 
-#if LENGTH_RASTER_TYPE == RASTER_MAP_TYPE_FLOAT64
-#define CELL_TYPE float64
+#if LENGTH_RASTER_TYPE == RASTER_TYPE_FLOAT64
+#define RASTER_TYPE float64
 #define FLEN_TYPE double
 #else
-#define CELL_TYPE float32
+#define RASTER_TYPE float32
 #define FLEN_TYPE float
 #endif
 
@@ -18,7 +18,7 @@
 #define SET_UP(row, col) do { \
         FLEN(row, col) = -FLEN(row, col) - FIND_UP(row, col) / 256.; } while(0)
 #define GET_DIR(row, col) (unsigned char)abs(FLEN(row, col))
-#define FLEN(row, col) dir_map->cells.CELL_TYPE[INDEX(row, col)]
+#define FLEN(row, col) dir_map->cells.RASTER_TYPE[INDEX(row, col)]
 #else
 
 #ifdef USE_LESS_MEMORY
@@ -32,7 +32,7 @@ static unsigned char *up_cells;
 
 #define DIR(row, col) dir_map->cells.byte[INDEX(row, col)]
 #define GET_DIR(row, col) DIR(row, col)
-#define FLEN(row, col) flen_map->cells.CELL_TYPE[INDEX(row, col)]
+#define FLEN(row, col) flen_map->cells.RASTER_TYPE[INDEX(row, col)]
 #endif
 
 #define FIND_UP(row, col) ( \
