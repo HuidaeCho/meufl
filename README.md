@@ -44,7 +44,7 @@ Miniconda3-latest-Windows-x86_64.exe /S /D=C:\opt\miniconda
 C:\opt\miniconda\condabin\conda.bat init
 ```
 4. Start Developer Command Prompt for VS 2022
-5. Setup Conda for GRASS build
+5. Setup Conda for MEUFL build
 ```cmd
 conda config --add channels conda-forge
 conda config --set channel_priority strict
