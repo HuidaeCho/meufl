@@ -39,13 +39,13 @@ double recode_degree(double, void *);
 /* uflen.c */
 void uflen(struct raster_map *, struct raster_map *, int, int);
 
-/* uflen_moremem.c */
-void uflen_moremem(struct raster_map *, struct raster_map *, int);
+/* uflen_leastmem.c */
+void uflen_leastmem(struct raster_map *, int);
 
 /* uflen_lessmem.c */
 void uflen_lessmem(struct raster_map *, struct raster_map *, int);
 
-/* uflen_leastmem.c */
-void uflen_leastmem(struct raster_map *, int);
+/* uflen_moremem.c */
+void uflen_moremem(struct raster_map *, struct raster_map *, int);
 
 #endif

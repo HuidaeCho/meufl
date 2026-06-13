@@ -19,9 +19,9 @@ meufl$(EXT): \
 	raster.o \
 	recode.o \
 	uflen.o \
-	uflen_moremem.o \
+	uflen_leastmem.o \
 	uflen_lessmem.o \
-	uflen_leastmem.o
+	uflen_moremem.o
 	$(CC) $(LDFLAGS) -o $@ $^ $(GDAL_LIBS)
 
 *.o: global.h raster.h
