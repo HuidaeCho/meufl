@@ -1,8 +1,8 @@
 #define _MAIN_C_
 
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <stdio.h>
 #include <gdal.h>
 #include <omp.h>
 #ifdef _MSC_VER
