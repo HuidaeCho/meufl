@@ -2,7 +2,7 @@
 
 Part of the [Memory-Efficient I/O-Improved Drainage Analysis System (MIDAS)](https://github.com/HuidaeCho/midas)
 
-**Citation**: Huidae Cho, Accepted in May 2026. Flow in Float: Memory-Efficient Upstream Flow Length Parallel Computation Using an IEEE-754-Based Union Encoding. Environmental Modelling & Software.
+**Citation**: Huidae Cho, September 2026. Flow in Float: Memory-Efficient Upstream Flow Length Parallel Computation Using an IEEE-754-Based Union Encoding. Environmental Modelling & Software 204, 107045. [doi:10.1016/j.envsoft.2026.107045](https://doi.org/10.1016/j.envsoft.2026.107045). [Author's Version](https://idea.isnew.info/publications/Flow%20in%20float%20-%20Memory-efficient%20upstream%20flow%20length%20parallel%20computation%20using%20an%20IEEE-754-based%20union%20encoding%20-%20Cho.2026.pdf).
 
 Predefined flow direction encodings in GeoTIFF: power2 (default, r.terraflow, ArcGIS), taudem (d8flowdir), 45degree (r.watershed), degree<br>
 ![image](https://github.com/user-attachments/assets/990f0530-fded-4ee5-bfbb-85056a50ca1c)

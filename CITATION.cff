@@ -16,5 +16,8 @@ preferred-citation:
       given-names: Huidae
   title: "Flow in Float: Memory-Efficient Upstream Flow Length Parallel Computation Using an IEEE-754-Based Union Encoding"
   journal: "Environmental Modelling & Software"
+  volume: 204
+  pages: "107045"
   year: 2026
-  status: "accepted"
+  month: 9
+  doi: 10.1016/j.envsoft.2026.107045
