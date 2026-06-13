@@ -16,7 +16,7 @@ int main(int argc, char *argv[])
 {
     int i;
     int print_usage = 1, calc_md5 = 0, from_one = 0, use_lessmem =
-        0, compress_output = 0;
+        2, compress_output = 0;
     double (*recode)(double, void *) = NULL;
     int *recode_data = NULL, encoding[8];
     char *dir_path = NULL, *dir_opts = NULL, *flen_path = NULL;
@@ -42,17 +42,17 @@ int main(int argc, char *argv[])
                     }
                     flen_path = argv[++i];
                     break;
-                case 'm':
+                case 'c':
                     calc_md5 = 1;
                     break;
                 case '1':
                     from_one = 1;
                     break;
-                case 'l':
+                case 'm':
                     use_lessmem = 1;
                     break;
-                case 'L':
-                    use_lessmem = 2;
+                case 'M':
+                    use_lessmem = 0;
                     break;
                 case 'z':
                     compress_output = 1;
@@ -152,10 +152,10 @@ int main(int argc, char *argv[])
         printf("Usage: meufl OPTIONS dir\n\n"
                "  dir\t\tInput flow direction raster (e.g., gpkg:file.gpkg:layer)\n"
                "  -o uflen\tOutput upstream flow length GeoTIFF (or -m required)\n"
-               "  -m\t\tCalculate MD5 (or -o required)\n"
+               "  -c\t\tCalculate MD5 (or -o required)\n"
                "  -1\t\tCount from 1 (default: 0)\n"
-               "  -l\t\tUse less memory\n"
-               "  -L\t\tUse least memory\n"
+               "  -m\t\tUse more memory\n"
+               "  -M\t\tUse most memory\n"
                "  -z\t\tCompress output GeoTIFF\n"
                "  -e encoding\tInput flow direction encoding\n"
                "\t\tpower2 (default): 2^0-7 (E-NE CW) (e.g., r.terraflow, ArcGIS)\n"
